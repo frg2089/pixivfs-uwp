@@ -94,7 +94,7 @@ namespace PixivFSUWP
             {
                 var param = ContentFrame.Back();
                 if (param is WaterfallPage.ListContent content) select(content);
-                else if (param is ValueTuple<WaterfallPage.ListContent, double> tuple) select(tuple.Item1);
+
                 UpdateNavButtonState();
 
                 // 本地方法
@@ -122,32 +122,34 @@ namespace PixivFSUWP
 
         private async void NavControl_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            if (OverAll.AppUri != null) return;
+            if (!(OverAll.AppUri is null)) return;
             if (_programmablechange)
             {
                 _programmablechange = false;
                 await HideNacPlaceHolder();
                 return;
             }
-            switch (sender.MenuItems.IndexOf(args.SelectedItem))
+            var select = sender.MenuItems.IndexOf(args.SelectedItem);
+            if (select >= 0 && select < 4)
             {
-                case 0:
-                    ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Recommend, App.FromRightTransitionInfo);
-                    await HideNacPlaceHolder();
-                    break;
-                case 1:
-                    ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Bookmark, App.FromRightTransitionInfo);
-                    await HideNacPlaceHolder();
-                    break;
-                case 2:
-                    ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Following, App.FromRightTransitionInfo);
-                    await HideNacPlaceHolder();
-                    break;
-                case 3:
-                    ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Ranking, App.FromRightTransitionInfo);
-                    await HideNacPlaceHolder();
-                    break;
+                ContentFrame.Navigate(typeof(WaterfallPage), (WaterfallPage.ListContent)select, App.FromRightTransitionInfo);
+                await HideNacPlaceHolder();
             }
+            //switch (sender.MenuItems.IndexOf(args.SelectedItem))
+            //{
+            //    case 0:
+            //        ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Recommend, App.FromRightTransitionInfo);
+            //        break;
+            //    case 1:
+            //        ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Bookmark, App.FromRightTransitionInfo);
+            //        break;
+            //    case 2:
+            //        ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Following, App.FromRightTransitionInfo);
+            //        break;
+            //    case 3:
+            //        ContentFrame.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.Ranking, App.FromRightTransitionInfo);
+            //        break;
+            //}
         }
 
         private void NavSelect(int index) => NavControl.SelectedItem = NavControl.MenuItems[index];

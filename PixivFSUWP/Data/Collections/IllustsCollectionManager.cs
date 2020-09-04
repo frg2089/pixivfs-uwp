@@ -12,8 +12,6 @@ namespace PixivFSUWP.Data.Collections
         public static BookmarkIllustsCollection BookmarkList { get; private set; }
         public static FollowingIllustsCollection FollowingList { get; private set; }
         public static RankingIllustsCollection RankingList { get; private set; }
-        //private static SearchResultIllustsCollection SearchResultList { get; set; }
-
         public static Stack<SearchResultIllustsCollection> SearchResults { get; } = new Stack<SearchResultIllustsCollection>();
 
         //public static IllustsCollectionBase<ViewModels.WaterfallItemViewModel> Instence;

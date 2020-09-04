@@ -65,9 +65,10 @@ namespace PixivFSUWP
                 localSettings.Values.Remove("exception");
             localSettings.Values["exception"] = e.Exception.ToString();
             localSettings.Values["isCrashed"] = true;
+            _ = Data.OverAll.TheMainPage.ShowTip("遇到未处理的异常");
             //只储存异常信息，而不强制退出应用。很多异常不影响应用稳定性。
             //MessageDialog dialog = new MessageDialog("Pixiv UWP has crashed. Please restart this app in order to report this issue.\n程序已崩溃，请重启本应用以便于报告此问题。", "Crashed/程序崩溃");
-            //await dialog.ShowAsync();
+            //_ = dialog.ShowAsync();
             //this.Exit();
         }
 

@@ -7,13 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+
 using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 
 namespace PixivFSUWP.Data.Collections
 {
-    public class UserIllustsCollection : IllustsCollectionBase<ViewModels.WaterfallItemViewModel>
+    public class UserIllustsCollection : IllustsCollectionBase
     {
         readonly string userID;
 
@@ -49,22 +50,7 @@ namespace PixivFSUWP.Data.Collections
                     return toret;
                 }
                 nexturl = illustsres.NextUrl?.ToString() ?? "";
-                foreach (var recillust in illustsres.Illusts)
-                {
-                    await Task.Run(() => pause.WaitOne());
-                    if (_emergencyStop)
-                    {
-                        nexturl = "";
-                        Clear();
-                        return new LoadMoreItemsResult() { Count = 0 };
-                    }
-                    WaterfallItem recommendi = WaterfallItem.FromObject(recillust);
-                    var recommendmodel = ViewModels.WaterfallItemViewModel.FromItem(recommendi);
-                    await recommendmodel.LoadImageAsync();
-                    Add(recommendmodel);
-                    toret.Count++;
-                }
-                return toret;
+                return await LoadMoreItems(toret, illustsres.Illusts);
             }
             finally
             {

@@ -7,13 +7,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+
 using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.UI.Xaml.Data;
 
 namespace PixivFSUWP.Data.Collections
 {
-    public class RankingIllustsCollection : IllustsCollectionBase<ViewModels.WaterfallItemViewModel>
+    public class RankingIllustsCollection : IllustsCollectionBase
     {
         protected override async Task<LoadMoreItemsResult> LoadMoreItemsAsync(CancellationToken c, uint count)
         {
@@ -42,22 +43,7 @@ namespace PixivFSUWP.Data.Collections
                     return toret;
                 }
                 nexturl = rankingres.NextUrl?.ToString() ?? "";
-                foreach (var recillust in rankingres.Illusts)
-                {
-                    await Task.Run(() => pause.WaitOne());
-                    if (_emergencyStop)
-                    {
-                        nexturl = "";
-                        Clear();
-                        return new LoadMoreItemsResult() { Count = 0 };
-                    }
-                    WaterfallItem recommendi = WaterfallItem.FromObject(recillust);
-                    var recommendmodel = ViewModels.WaterfallItemViewModel.FromItem(recommendi);
-                    await recommendmodel.LoadImageAsync();
-                    Add(recommendmodel);
-                    toret.Count++;
-                }
-                return toret;
+                return await LoadMoreItems(toret, rankingres.Illusts);
             }
             finally
             {

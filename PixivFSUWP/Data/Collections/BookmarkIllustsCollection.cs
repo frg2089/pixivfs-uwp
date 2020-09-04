@@ -13,7 +13,7 @@ using Windows.Data.Json;
 
 namespace PixivFSUWP.Data.Collections
 {
-    public class BookmarkIllustsCollection : IllustsCollectionBase<ViewModels.WaterfallItemViewModel>
+    public class BookmarkIllustsCollection : IllustsCollectionBase
     {
         readonly string userID;
 
@@ -47,27 +47,13 @@ namespace PixivFSUWP.Data.Collections
                             getparam("filter"), getparam("max_bookmark_id"));
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine(ex);
                     return toret;
                 }
                 nexturl = bookmarkres.NextUrl?.ToString() ?? "";
-                foreach (var recillust in bookmarkres.Illusts)
-                {
-                    await Task.Run(() => pause.WaitOne());
-                    if (_emergencyStop)
-                    {
-                        nexturl = "";
-                        Clear();
-                        return new LoadMoreItemsResult() { Count = 0 };
-                    }
-                    WaterfallItem recommendi = WaterfallItem.FromObject(recillust);
-                    var recommendmodel = ViewModels.WaterfallItemViewModel.FromItem(recommendi);
-                    await recommendmodel.LoadImageAsync();
-                    Add(recommendmodel);
-                    toret.Count++;
-                }
-                return toret;
+                return await LoadMoreItems(toret, bookmarkres.Illusts);
             }
             finally
             {

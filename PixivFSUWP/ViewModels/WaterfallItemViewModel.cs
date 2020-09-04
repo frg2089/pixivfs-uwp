@@ -30,6 +30,7 @@ namespace PixivFSUWP.ViewModels
         public async Task LoadImageAsync()
         {
             ImageSource = await Data.OverAll.LoadImageAsync(ImageUri);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ImageSource)));
         }
 
         public string StarsString => "★" + Stars.ToString();

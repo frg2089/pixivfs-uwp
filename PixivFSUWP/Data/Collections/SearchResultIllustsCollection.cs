@@ -13,7 +13,7 @@ using Windows.Data.Json;
 
 namespace PixivFSUWP.Data.Collections
 {
-    public class SearchResultIllustsCollection : IllustsCollectionBase<ViewModels.WaterfallItemViewModel>
+    public class SearchResultIllustsCollection : IllustsCollectionBase
     {
         readonly string word;
         readonly string searchTarget;
@@ -58,22 +58,7 @@ namespace PixivFSUWP.Data.Collections
                     return toret;
                 }
                 nexturl = searchres.NextUrl?.ToString() ?? "";
-                foreach (var recillust in searchres.Illusts)
-                {
-                    await Task.Run(() => pause.WaitOne());
-                    if (_emergencyStop)
-                    {
-                        nexturl = "";
-                        Clear();
-                        return new LoadMoreItemsResult() { Count = 0 };
-                    }
-                    WaterfallItem recommendi = WaterfallItem.FromObject(recillust);
-                    var recommendmodel = ViewModels.WaterfallItemViewModel.FromItem(recommendi);
-                    await recommendmodel.LoadImageAsync();
-                    Add(recommendmodel);
-                    toret.Count++;
-                }
-                return toret;
+                return await LoadMoreItems(toret, searchres.Illusts);
             }
             finally
             {

@@ -307,7 +307,6 @@ namespace PixivFSUWP
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             OverAll.TheMainPage?.SelectNavPlaceholder(OverAll.GetResourceString("UserDetailPagePlain"));
-
             //治标不治本的加载逻辑……反正个人插画也不会太多,全部重载就好)
             if (e.Parameter is ValueTuple<int, bool> tuple)
             {
@@ -323,6 +322,7 @@ namespace PixivFSUWP
                 // 只传ID进来 查看用户信息 这把信息隐藏了看什么...
                 //grdDetail.Visibility = Visibility.Collapsed;
             }
+            System.Diagnostics.Debug.WriteLine($"UserID = {userid}");
             Data.OverAll.RefreshUserList(userid.ToString()); //治 标
             Data.OverAll.UserList.ResumeLoading();
             itemsSource = OverAll.UserList;

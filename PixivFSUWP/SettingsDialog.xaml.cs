@@ -17,6 +17,7 @@ namespace PixivFSUWP
 {
     public sealed partial class SettingsDialog : ContentDialog
     {
+        ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
         public SettingsDialog()
         {
             this.InitializeComponent();
@@ -25,7 +26,6 @@ namespace PixivFSUWP
 
         private void API_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             localSettings.Values["SauceNAOAPI"] = tbSauceNAO.Text;
             localSettings.Values["ImgurAPI"] = tbImgur.Text;
         }
@@ -250,5 +250,17 @@ namespace PixivFSUWP
                 sender.Text = folder.Path;
             }
         }
+#if DEBUG
+        private void LogRank_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var rank = (sender as ComboBox).SelectedIndex;
+            if (rank > 6 && rank < 0) localSettings.Values["LogMgr"] = false;
+            else
+            {
+                localSettings.Values["LogMgr"] = true;
+                localSettings.Values["LogRank"] = rank;
+            }
+        }
+#endif
     }
 }

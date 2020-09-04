@@ -37,13 +37,15 @@ namespace PixivFSUWP.Data
             public string SearchTarget;
             public string Sort;
             public string Duration;
+
+            public override string ToString() => $"Word:\"{Word}\"\tSearchTarget:\"{SearchTarget}\"\tSort:\"{Sort}\"\tDuration:\"{Duration}\"";
         }
 
 
         public static void RefreshUserList(string userId)
         {
             UserList?.StopLoading();
-            UserList = new UserIllustsCollection(userId); 
+            UserList = new UserIllustsCollection(userId);
         }
         //携带缓存的图像下载
         public static async Task<MemoryStream> DownloadImage(string Uri, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)

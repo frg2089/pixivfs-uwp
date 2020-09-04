@@ -163,6 +163,7 @@
                             Margin="5 2" x:Uid="DeleteInvalid" x:Name="btnDelInvalid" Click="btnDelInvalid_Click"/>
                 </Grid>
             </StackPanel>
+
             <!--版本信息-->
             <StackPanel Margin="0,10">
                 <TextBlock Margin="15,0,15,0" FontSize="18" FontWeight="Bold" x:Uid="VersionInfo"/>

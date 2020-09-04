@@ -89,7 +89,7 @@ namespace PixivFSUWP
             {
                 illustID = param.Item1;
             }
-            //System.Diagnostics.Debug.WriteLine("View Pixiv ID = " + illustID.ToString());
+            System.Diagnostics.Debug.WriteLine($"View Pixiv ID = {illustID}");
             base.OnNavigatedTo(e);
             _ = loadContent();
         }

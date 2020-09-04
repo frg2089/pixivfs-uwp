@@ -37,6 +37,7 @@ namespace PixivFSUWP
         private async void QuickSave_Click(object sender, RoutedEventArgs e)
         {
             if (tapped is null) return;
+            System.Diagnostics.Debug.WriteLine(tapped.ItemId);
             await IllustDetail.FromObject(await new PixivAppAPI(OverAll.GlobalBaseAPI).GetIllustDetailAsync(tapped.ItemId.ToString())).DownloadFirstImage();
         }
 
@@ -45,6 +46,7 @@ namespace PixivFSUWP
             if (tapped == null) return;
             var i = tapped;
             var title = i.Title;
+            System.Diagnostics.Debug.WriteLine(i.ItemId);
             try
             {
                 //用Title作标识，表明任务是否在执行
@@ -128,8 +130,7 @@ namespace PixivFSUWP
                     }
                     catch (Exception ex)
                     {
-                        Trace.WriteLine($"[{nameof(this.WaterfallContent_Loaded)}]");
-                        Trace.WriteLine(ex);
+                        System.Diagnostics.Debug.WriteLine(ex);
                     }
                 });
             }
@@ -140,6 +141,7 @@ namespace PixivFSUWP
             ListView listView = (ListView)sender;
             tapped = ((FrameworkElement)e.OriginalSource).DataContext as ViewModels.WaterfallItemViewModel;
             if (tapped == null) return;
+            System.Diagnostics.Debug.WriteLine(tapped.ItemId);
             quickStar.Text = (tapped.IsBookmarked) ?
                 OverAll.GetResourceString("DeleteBookmarkPlain") :
                 OverAll.GetResourceString("QuickBookmarkPlain");
@@ -147,18 +149,16 @@ namespace PixivFSUWP
             quickActions.ShowAt(listView, e.GetPosition(listView));
         }
 
-        private void WaterfallListView_ItemClick(object sender, ItemClickEventArgs e) => Frame.Navigate(
-            typeof(IllustDetailPage),
-            (e.ClickedItem as ViewModels.WaterfallItemViewModel).ItemId,
-            App.DrillInTransitionInfo);
+        private void WaterfallListView_ItemClick(object sender, ItemClickEventArgs e)
+            => Frame.Navigate(typeof(IllustDetailPage), (e.ClickedItem as ViewModels.WaterfallItemViewModel).ItemId, App.DrillInTransitionInfo);
 
-        //记录点击的项目索引
-        //int? clickedIndex = null;
+
         private void WaterfallListView_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
             ListView listView = (ListView)sender;
             tapped = ((FrameworkElement)e.OriginalSource).DataContext as ViewModels.WaterfallItemViewModel;
             if (tapped == null) return;
+            System.Diagnostics.Debug.WriteLine(tapped.ItemId);
             quickStar.Text = (tapped.IsBookmarked) ?
                 OverAll.GetResourceString("DeleteBookmarkPlain") :
                 OverAll.GetResourceString("QuickBookmarkPlain");
@@ -168,7 +168,7 @@ namespace PixivFSUWP
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            (WaterfallListView.ItemsSource as IllustsCollectionBase<ViewModels.WaterfallItemViewModel>)?.PauseLoading();
+            (WaterfallListView.ItemsSource as IllustsCollectionBase)?.PauseLoading();
             base.OnNavigatedFrom(e);
             if (!_backflag)
             {
@@ -179,9 +179,9 @@ namespace PixivFSUWP
 
                 OverAll.TheMainPage?.UpdateNavButtonState();
             }
-            if (WaterfallListView.ItemsSource is IllustsCollectionBase<ViewModels.WaterfallItemViewModel> collection)
+            if (WaterfallListView.ItemsSource is IllustsCollectionBase collection)
             {
-                Debug.WriteLine(WaterfallListView.ItemsSource + "PauseLoading");
+                System.Diagnostics.Debug.WriteLine(WaterfallListView.ItemsSource + "PauseLoading");
                 collection.VerticalOffset = WaterfallListView.VerticalOffset;
                 collection.PauseLoading();
             }
@@ -193,6 +193,7 @@ namespace PixivFSUWP
             base.OnNavigatedTo(e);
             if (e.Parameter is ListContent content)
                 listContent = content;
+
             switch (listContent)
             {
                 case ListContent.Recommend:
@@ -216,9 +217,9 @@ namespace PixivFSUWP
                     WaterfallListView.ItemsSource = IllustsCollectionManager.SearchResults.Pop();
                     break;
             }
-            if (WaterfallListView.ItemsSource is IllustsCollectionBase<ViewModels.WaterfallItemViewModel> collection)
+            if (WaterfallListView.ItemsSource is IllustsCollectionBase collection)
             {
-                Debug.WriteLine(WaterfallListView.ItemsSource + "\tResumeLoading");
+                System.Diagnostics.Debug.WriteLine(WaterfallListView.ItemsSource + "\tResumeLoading");
                 collection.ResumeLoading();
                 verticalOffset = collection.VerticalOffset;
             }

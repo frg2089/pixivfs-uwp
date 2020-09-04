@@ -1,5 +1,7 @@
 ﻿using Microsoft.Toolkit.Uwp.Helpers;
+
 using System;
+
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.DataTransfer;

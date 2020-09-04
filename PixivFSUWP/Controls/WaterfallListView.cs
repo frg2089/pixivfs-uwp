@@ -64,16 +64,21 @@ namespace PixivFSUWP.Controls
             {
                 while ((sender as ScrollViewer).VerticalOffset >= (sender as ScrollViewer).ScrollableHeight - 500)
                 {
+                    if (ItemsSource is null) return;
                     try
                     {
                         var res = await (ItemsSource as ISupportIncrementalLoading)?.LoadMoreItemsAsync(0);
                         if (res.Count == 0) return;
                     }
-                    catch (InvalidOperationException)
+                    catch (InvalidOperationException ex)
                     {
+                        System.Diagnostics.Debug.WriteLine(ex);
                         return;
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex);
+                    }
                 }
             }
             finally

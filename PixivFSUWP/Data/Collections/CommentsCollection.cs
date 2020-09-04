@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Data;
 
 namespace PixivFSUWP.Data.Collections
 {
-    public class CommentsCollection : IllustsCollectionBase<ViewModels.CommentViewModel>
+    public class CommentsCollection : CollectionBase<ViewModels.CommentViewModel>
     {
         readonly string illustid;
         List<ViewModels.CommentViewModel> ChildrenComments = new List<ViewModels.CommentViewModel>();

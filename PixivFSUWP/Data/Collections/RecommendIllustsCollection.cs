@@ -15,7 +15,7 @@ using System.Diagnostics;
 
 namespace PixivFSUWP.Data.Collections
 {
-    public class RecommendIllustsCollection : IllustsCollectionBase<ViewModels.WaterfallItemViewModel>
+    public class RecommendIllustsCollection : IllustsCollectionBase
     {
         protected override async Task<LoadMoreItemsResult> LoadMoreItemsAsync(CancellationToken c, uint count)
         {
@@ -26,7 +26,7 @@ namespace PixivFSUWP.Data.Collections
                 PixivCS.Objects.IllustRecommended recommendres = null;
                 try
                 {
-                    Debug.WriteLine($"[RecommendIllustsCollection.LoadMoreItemsAsync]\t{nexturl}");
+                    System.Diagnostics.Debug.WriteLine($"[LoadMoreItemsAsync]\t{nexturl}");
                     if (nexturl == "begin")
                         recommendres = await new PixivAppAPI(OverAll.GlobalBaseAPI)
                             .GetIllustRecommendedAsync();
@@ -48,37 +48,19 @@ namespace PixivFSUWP.Data.Collections
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex);
+                    System.Diagnostics.Debug.WriteLine(ex);
                     return toret;
                 }
                 nexturl = recommendres.NextUrl?.ToString() ?? "";
-                Debug.WriteLine($"[RecommendIllustsCollection.LoadMoreItemsAsync]\t{nexturl}");
+                System.Diagnostics.Debug.WriteLine($"[RecommendIllustsCollection]\t{nexturl}");
                 if (recommendres.Illusts is null)
                 {
-                    Debug.WriteLine("出现了NULL");
+                    System.Diagnostics.Debug.WriteLine("出现了NULL");
                     // 这里调用更新身份信息的方法
 
-                    Debug.WriteLine("Done");
+                    System.Diagnostics.Debug.WriteLine("Done");
                 }
-                else
-                foreach (var recillust in recommendres.Illusts)
-                {
-                    await Task.Run(pause.WaitOne);
-                    Debug.WriteLine($"[RecommendIllustsCollection.LoadMoreItemsAsync]\t加载图片:{toret.Count + 1}/{recommendres.Illusts.Length}");
-                    if (_emergencyStop)
-                    {
-                        Debug.WriteLine("_emergencyStop = " + _emergencyStop);
-                        nexturl = "";
-                        Clear();
-                        return new LoadMoreItemsResult { Count = 0 };
-                    }
-                    WaterfallItem recommendi = WaterfallItem.FromObject(recillust);
-                    var recommendmodel = ViewModels.WaterfallItemViewModel.FromItem(recommendi);
-                    await recommendmodel.LoadImageAsync();
-                    Add(recommendmodel);
-                    toret.Count++;
-                }
-                return toret;
+                return await LoadMoreItems(toret, recommendres.Illusts);
             }
             finally
             {

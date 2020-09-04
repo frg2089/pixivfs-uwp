@@ -33,7 +33,7 @@ namespace PixivFSUWP
             cbSearchTarget.SelectedIndex = 1;
             cbSort.SelectedIndex = 0;
             cbDuration.SelectedIndex = 0;
-            TxtWord_QuerySubmitted(null, null);
+            Search(txtWord.Text);
         }
 
         private async Task<List<ViewModels.TagViewModel>> GetTrendingTags()
@@ -41,14 +41,17 @@ namespace PixivFSUWP
             try
             {
                 var res = await new PixivAppAPI(Data.OverAll.GlobalBaseAPI).GetTrendingTagsIllustAsync();
-                var array = res.TrendTags;
-                List<ViewModels.TagViewModel> toret = new List<ViewModels.TagViewModel>();
-                foreach (var i in array)
+                List<ViewModels.TagViewModel> toret = new List<ViewModels.TagViewModel>(res.TrendTags.Length);
+                foreach (var i in res.TrendTags)
+                {
+                    System.Diagnostics.Debug.WriteLine(i.Tag);
                     toret.Add(new ViewModels.TagViewModel() { Tag = i.Tag });
+                }
                 return toret;
             }
-            catch
+            catch(Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine(ex);
                 return null;
             }
         }
@@ -57,6 +60,7 @@ namespace PixivFSUWP
             if (int.TryParse(asbGTPID.Text, out int id))
             {
                 Hide();
+                System.Diagnostics.Debug.WriteLine($"Go To :{id}");
                 Frame?.Navigate(typeof(IllustDetailPage), id, App.FromRightTransitionInfo);
             }
         }
@@ -127,6 +131,7 @@ namespace PixivFSUWP
                 }
                 Data.Collections.IllustsCollectionManager.RefreshSearchResultList(param);
                 Hide();
+                System.Diagnostics.Debug.WriteLine(param);
                 Frame?.Navigate(typeof(WaterfallPage), WaterfallPage.ListContent.SearchResult, App.FromRightTransitionInfo);
             }
             if (s.Trim() != lastWord || cbSearchTarget.SelectedIndex != lastSearchTarget ||
