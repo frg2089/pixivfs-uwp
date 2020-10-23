@@ -151,8 +151,8 @@ namespace PixivFSUWP.Data.DownloadJobs
                 try
                 {
                     using (var memStream =
-                        await OverAll.DownloadImage(Uri, tokenSource.Token, pauseEvent, async (loaded, length)
-                        => await Task.Run(() => Progress = (int)(loaded * 99 / length))))
+                        await OverAll.DownloadImage(Uri, tokenSource.Token, pauseEvent, (loaded, length)
+                        => Progress = (int)(loaded * 99 / length)))
                     {
                         if (tokenSource.IsCancellationRequested) return;
                         if (await WriteToFile(memStream) == FileUpdateStatus.Complete)

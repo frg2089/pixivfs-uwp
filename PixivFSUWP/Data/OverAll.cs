@@ -48,10 +48,10 @@ namespace PixivFSUWP.Data
             UserList = new UserIllustsCollection(userId);
         }
         //携带缓存的图像下载
-        public static async Task<MemoryStream> DownloadImage(string Uri, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)
+        public static async Task<MemoryStream> DownloadImage(string Uri, ManualResetEvent PauseEvent = null, Action<long, long> ProgressCallback = null)
             => await DownloadImage(Uri, CancellationToken.None, PauseEvent, ProgressCallback);
 
-        public static async Task<MemoryStream> DownloadImage(string Uri, CancellationToken CancellationToken, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)
+        public static async Task<MemoryStream> DownloadImage(string Uri, CancellationToken CancellationToken, ManualResetEvent PauseEvent = null, Action<long, long> ProgressCallback = null)
         {
             //var Uri = _Uri;
             //if (Uri.StartsWith("https"))
@@ -81,7 +81,7 @@ namespace PixivFSUWP.Data
                             PauseEvent?.WaitOne();
                             bytesCounter += bytesRead;
                             await memStream.WriteAsync(buffer, 0, bytesRead, CancellationToken);
-                            _ = ProgressCallback?.Invoke(bytesCounter, length);
+                            _ = Task.Run(() => ProgressCallback?.Invoke(length, length));
                         }
                     }
                     catch (TaskCanceledException)
@@ -110,7 +110,7 @@ namespace PixivFSUWP.Data
                     var memStream = new MemoryStream();
                     await fileStream.CopyToAsync(memStream);
                     var length = memStream.Length;
-                    _ = ProgressCallback?.Invoke(length, length);
+                    _ = Task.Run(() => ProgressCallback?.Invoke(length, length));
                     memStream.Position = 0;
                     return memStream;
                 }
@@ -122,10 +122,10 @@ namespace PixivFSUWP.Data
             return string.Format("data:image/png;base64,{0}", Convert.ToBase64String((await DownloadImage(Uri)).ToArray()));
         }
 
-        public static async Task<BitmapImage> LoadImageAsync(string Uri, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)
+        public static async Task<BitmapImage> LoadImageAsync(string Uri, ManualResetEvent PauseEvent = null, Action<long, long> ProgressCallback = null)
             => await LoadImageAsync(Uri, CancellationToken.None, PauseEvent, ProgressCallback);
 
-        public static async Task<BitmapImage> LoadImageAsync(string Uri, CancellationToken CancellationToken, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)
+        public static async Task<BitmapImage> LoadImageAsync(string Uri, CancellationToken CancellationToken, ManualResetEvent PauseEvent = null, Action<long, long> ProgressCallback = null)
         {
             var toret = new BitmapImage();
             using (var memStream = await DownloadImage(Uri, CancellationToken, PauseEvent, ProgressCallback))
@@ -133,10 +133,10 @@ namespace PixivFSUWP.Data
             return toret;
         }
 
-        public static async Task<WriteableBitmap> LoadImageAsync(string Uri, int Width, int Height, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)
+        public static async Task<WriteableBitmap> LoadImageAsync(string Uri, int Width, int Height, ManualResetEvent PauseEvent = null, Action<long, long> ProgressCallback = null)
             => await LoadImageAsync(Uri, Width, Height, PauseEvent, ProgressCallback);
 
-        public static async Task<WriteableBitmap> LoadImageAsync(string Uri, int Width, int Height, CancellationToken CancellationToken, ManualResetEvent PauseEvent = null, Func<long, long, Task> ProgressCallback = null)
+        public static async Task<WriteableBitmap> LoadImageAsync(string Uri, int Width, int Height, CancellationToken CancellationToken, ManualResetEvent PauseEvent = null, Action<long, long> ProgressCallback = null)
         {
             var toret = new WriteableBitmap(Width, Height);
             using (var memStream = await DownloadImage(Uri, CancellationToken, PauseEvent, ProgressCallback))
