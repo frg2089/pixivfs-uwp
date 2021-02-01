@@ -19,15 +19,42 @@ namespace PixivFSUWP.ViewModels
         public int Stars { get; set; }
         public int Pages { get; set; }
         public bool IsBookmarked { get; set; }
-        public BitmapImage ImageSource { get; set; }
+        public BitmapImage ImageSource
+        {
+            get => imageSource;
+            set
+            {
+                imageSource = value;
+                NotifyChange(nameof(ImageSource));
+            }
+        }
         public int Width { get; set; }
         public int Height { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
+        private WeakReference<BitmapImage> imageSourceWeakReference;
+        private BitmapImage imageSource;
+        private System.Threading.CancellationTokenSource cancelSource = new System.Threading.CancellationTokenSource();
 
         public async Task LoadImageAsync()
         {
-            ImageSource = await Data.OverAll.LoadImageAsync(ImageUri);
+            if (ImageSource is null
+                && !(imageSourceWeakReference is null)
+                && imageSourceWeakReference.TryGetTarget(out var img))
+            {
+                ImageSource = img;
+            }
+            else
+                ImageSource = await Data.OverAll.LoadImageAsync(ImageUri, cancelSource.Token);
+        }
+        public void ReleaseImage()
+        {
+            cancelSource.Cancel();
+            if (!(ImageSource is null))
+            {
+                imageSourceWeakReference = new WeakReference<BitmapImage>(ImageSource);
+                ImageSource = null;
+            }
         }
 
         public string StarsString

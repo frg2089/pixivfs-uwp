@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -19,6 +20,14 @@ namespace PixivFSUWP.Controls
         {
             //不使用base的增量加载
             IncrementalLoadingTrigger = IncrementalLoadingTrigger.None;
+            Loaded += WaterfallListView_Loaded;
+        }
+
+        private void WaterfallListView_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (ItemsPanelRoot is WaterfallContentPanel panel &&
+                GetTemplateChild("ScrollViewer") is ScrollViewer sv)
+                panel.Tag = sv;
         }
 
         protected override void OnApplyTemplate()
@@ -39,7 +48,8 @@ namespace PixivFSUWP.Controls
                     try
                     {
                         var res = await (ItemsSource as ISupportIncrementalLoading)?.LoadMoreItemsAsync(0);
-                        if (res.Count == 0) return;
+                        if (res.Count == 0)
+                            return;
                     }
                     catch (InvalidOperationException)
                     {
@@ -51,19 +61,22 @@ namespace PixivFSUWP.Controls
                 busyLoading = false;
             }
         }
-
-        private async void ScrollViewer_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        private async void ScrollViewer_ViewChanged(object o, ScrollViewerViewChangedEventArgs e)
         {
-            if (busyLoading) return;
+            (ItemsPanelRoot as WaterfallContentPanel).Virtualization();
+            if (busyLoading)
+                return;
             busyLoading = true;
+            var sender = o as ScrollViewer;
             try
             {
-                while ((sender as ScrollViewer).VerticalOffset >= (sender as ScrollViewer).ScrollableHeight - 500)
+                while (sender.VerticalOffset >= sender.ScrollableHeight - 500)
                 {
                     try
                     {
                         var res = await (ItemsSource as ISupportIncrementalLoading)?.LoadMoreItemsAsync(0);
-                        if (res.Count == 0) return;
+                        if (res.Count == 0)
+                            return;
                     }
                     catch (InvalidOperationException)
                     {

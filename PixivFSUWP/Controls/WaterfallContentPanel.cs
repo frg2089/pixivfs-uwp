@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -71,9 +73,81 @@ namespace PixivFSUWP.Controls
             {
                 i.Measure(new Size(itemwidth, double.PositiveInfinity));
                 heights[heights.IndexOf(heights.Min())] += ItemMargin + i.DesiredSize.Height;
+                (i as FrameworkElement).Tag = i.DesiredSize;
+                //if (i.DesiredSize.Height > 0)
+                //    if (((i as ListViewItem).ContentTemplateRoot as Grid)?.Children[0] is Image image)
+                //    {
+                //        image.Height = i.DesiredSize.Height;
+                //        image.Width = i.DesiredSize.Width;
+                //    }
             }
             toret.Height = heights.Max() + TopOffset;
             return toret;
+        }
+
+        private bool virtualizationBusy = false;
+        internal void Virtualization()
+        {
+            Debug.WriteLine($"[{nameof(WaterfallContentPanel)}.{nameof(MeasureOverride)}]\t:Window Height = {Window.Current.Bounds.Height}\tActualHeight = {ActualHeight}");
+            if (virtualizationBusy)
+                return;
+
+            try
+            {
+                virtualizationBusy = true;
+                if (Tag is ScrollViewer scrollViewer)
+                {
+                    Debug.WriteLine($"[{nameof(WaterfallContentPanel)}.{nameof(MeasureOverride)}]\t:ScrollViewer.VerticalOffset = {scrollViewer.VerticalOffset}");
+
+                    foreach (var i in Children)
+                    {
+                        var generalTransform = i.TransformToVisual(this);
+                        var point = generalTransform.TransformPoint(new Point(0, 0));
+                        if (point.Y + i.DesiredSize.Height < scrollViewer.VerticalOffset - 500)
+                        {
+                            if (((i as ListViewItem).ContentTemplateRoot as Grid)?.Children[0] is Image image)
+                            {
+                                image.Height = image.ActualHeight;
+                                image.Width = i.DesiredSize.Width;
+                            }
+                            ((i as FrameworkElement).DataContext as ViewModels.WaterfallItemViewModel).ReleaseImage();
+                            i.Opacity = 0;
+                            //i.Visibility = Visibility.Collapsed;
+                        }
+                        else if (point.Y > scrollViewer.VerticalOffset + Window.Current.Bounds.Height + 500)
+                        {
+                            if (((i as ListViewItem).ContentTemplateRoot as Grid)?.Children[0] is Image image)
+                            {
+                                image.Height = image.ActualHeight;
+                                image.Width = i.DesiredSize.Width;
+                            }
+                            ((i as FrameworkElement).DataContext as ViewModels.WaterfallItemViewModel).ReleaseImage();
+                            i.Opacity = 0;
+                            //i.Visibility = Visibility.Collapsed;
+                        }
+                        else
+                        {
+                            var task = ((i as FrameworkElement).DataContext as ViewModels.WaterfallItemViewModel).LoadImageAsync();
+                            i.Opacity = 1;
+                            task.ContinueWith(t => i.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                if (((i as ListViewItem).ContentTemplateRoot as Grid)?.Children[0] is Image image)
+                                {
+                                    image.Height = double.NaN;
+                                    image.Width = double.NaN;
+                                }
+                            }));
+                            //if ((i as FrameworkElement).Tag is Size size)
+                            //    size.Height;
+                            //i.Visibility = Visibility.Visible;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                virtualizationBusy = false;
+            }
         }
 
         //排版，不改变大小
